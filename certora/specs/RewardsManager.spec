@@ -1,8 +1,8 @@
-
+import "Setup.spec"
 using Controller as controller
 using Curation as _curation
 using EpochManager as _epochManager
-// using RewardsManagerHarness as _rewardsManager
+using RewardsManagerHarness as _rewardsManager
 using Staking as _staking
 using GraphToken as _graphToken
 using L1GraphTokenGateway as _graphTokenGateway
@@ -15,8 +15,6 @@ methods {
     GRAPH_TOKEN() returns (bytes32) envfree
     GRAPH_TOKEN_GATEWAY() returns (bytes32) envfree
 
-    // _resolveContract(bytes32 _nameHash) returns (address) 
-    //     => linkedAddress(_nameHash)
     getAccRewardsPerSignal() returns (uint256) envfree
     getAccRewardsForSubgraph(bytes32) returns (uint256) envfree
     getAccRewardsPerAllocatedToken(bytes32) returns (uint256, uint256) envfree
@@ -35,15 +33,8 @@ methods {
     mint(address,uint256) => DISPATCHER(true)
     getAllocation(address) returns ((address,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)) => DISPATCHER(true)
     getSubgraphAllocatedTokens(bytes32) returns (uint256) => DISPATCHER(true)
-    
-    _addressCache(bytes32) returns (address) envfree
 
-    subgraphs(bytes32) returns (uint256,uint256,uint256,uint256) envfree
-
-    accRewardsPerSignalLastBlockUpdated() envfree
-    isDenied(bytes32) returns (bool) envfree
-    issuancePerBlock() returns (uint256) envfree
-    minimumSubgraphSignal() returns (uint256) envfree
+   
 }
 
 invariant specVsSolidityConsts()
@@ -56,28 +47,11 @@ invariant specVsSolidityConsts()
     &&
     _addressCache(0x4375726174696f6e000000000000000000000000000000000000000000000000) == _curation &&
     _addressCache(0x45706f63684d616e616765720000000000000000000000000000000000000000) == _epochManager &&
-    _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == currentContract &&
+    _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == _rewardsManager &&
     _addressCache(0x5374616b696e6700000000000000000000000000000000000000000000000000) == _staking &&
     _addressCache(0x4772617068546f6b656e00000000000000000000000000000000000000000000) == _graphToken &&
     _addressCache(0x4772617068546f6b656e47617465776179000000000000000000000000000000) == _graphTokenGateway
 
-
-// function linkedAddress(bytes32 _nameHash) returns address {   
-//     requireInvariant specVsSolidityConsts();
-//     if (_nameHash == 0x4375726174696f6e000000000000000000000000000000000000000000000000)
-//         return _curation;
-//     if (_nameHash == 0x45706f63684d616e616765720000000000000000000000000000000000000000)
-//         return _epochManager;
-//     if (_nameHash == 0x526577617264734d616e61676572000000000000000000000000000000000000)
-//         return currentContract;
-//     if (_nameHash == 0x5374616b696e6700000000000000000000000000000000000000000000000000)
-//         return _staking;
-//     if (_nameHash == 0x4772617068546f6b656e00000000000000000000000000000000000000000000)
-//         return _graphToken;
-//     if (_nameHash == 0x4772617068546f6b656e47617465776179000000000000000000000000000000)
-//         return _graphTokenGateway;
-//     return 0;
-// }
 
 rule complexity_check(method f) filtered {
     f -> !f.isView
@@ -88,29 +62,6 @@ rule complexity_check(method f) filtered {
 
     assert false, "this assertion should fail";
 }
-
-// function setup(env e) {
-//     requireInvariant specVsSolidityConsts();
-//     // require CURATION() == 0x4375726174696f6e000000000000000000000000000000000000000000000000 &&
-//     // EPOCH_MANAGER() == 0x45706f63684d616e616765720000000000000000000000000000000000000000 &&
-//     // REWARDS_MANAGER() == 0x526577617264734d616e61676572000000000000000000000000000000000000 &&
-//     // STAKING() == 0x5374616b696e6700000000000000000000000000000000000000000000000000 &&
-//     // GRAPH_TOKEN() == 0x4772617068546f6b656e00000000000000000000000000000000000000000000 &&
-//     // GRAPH_TOKEN_GATEWAY() == 0x4772617068546f6b656e47617465776179000000000000000000000000000000
-//     // &&
-//     // _addressCache(0x4375726174696f6e000000000000000000000000000000000000000000000000) == _curation &&
-//     // _addressCache(0x45706f63684d616e616765720000000000000000000000000000000000000000) == _epochManager &&
-//     // _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == currentContract &&
-//     // _addressCache(0x5374616b696e6700000000000000000000000000000000000000000000000000) == _staking &&
-//     // _addressCache(0x4772617068546f6b656e00000000000000000000000000000000000000000000) == _graphToken &&
-//     // _addressCache(0x4772617068546f6b656e47617465776179000000000000000000000000000000) == _graphTokenGateway;
-//     // require e.msg.sender != _curation;
-//     // require e.msg.sender != _epochManager;
-//     // require e.msg.sender != _rewardsManager;
-//     // require e.msg.sender != _staking;
-//     // require e.msg.sender != _graphToken;
-//     // require e.msg.sender != _graphTokenGateway;
-// }
 
 rule takeRewards_check() {
     env e;

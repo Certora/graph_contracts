@@ -17,12 +17,12 @@ then
     RULE="--rule $1"
 fi
 certoraRun \
-    certora/harnesses/RewardsManagerHarness.sol \
+    certora/harnesses/StakingHarness.sol \
     certora/munged/token/GraphToken.sol \
     certora/munged/curation/Curation.sol \
     certora/munged/governance/Controller.sol \
+    certora/harnesses/RewardsManagerHarness.sol \
     certora/munged/epochs/EpochManager.sol \
-    certora/munged/staking/Staking.sol \
     certora/munged/gateway/L1GraphTokenGateway.sol \
     --link RewardsManagerHarness:controller=Controller \
     --verify RewardsManagerHarness:certora/specs/RewardsManager.spec \
