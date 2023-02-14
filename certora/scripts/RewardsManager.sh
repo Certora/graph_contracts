@@ -24,6 +24,7 @@ certoraRun \
     certora/munged/epochs/EpochManager.sol \
     certora/munged/staking/Staking.sol \
     certora/munged/gateway/L1GraphTokenGateway.sol \
+    --link RewardsManagerHarness:controller=Controller \
     --verify RewardsManagerHarness:certora/specs/RewardsManager.spec \
     --packages @openzeppelin=node_modules/@openzeppelin \
     --staging \
@@ -32,9 +33,10 @@ certoraRun \
     --solc solc7.6 \
     $RULE \
     --send_only \
+    --rule_sanity=basic \
     --msg "RewardsManagerHarness: $1 $2"
 
-    # --link RewardsManagerHarness:controller=Controller \
+    
     # --link RewardsManagerHarness:_graphToken=GraphToken \
     # --link RewardsManagerHarness:_curation=Curation \
     # --link RewardsManagerHarness:_rewardsManager=RewardsManagerHarness \

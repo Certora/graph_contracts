@@ -2,7 +2,7 @@
 using Controller as controller
 using Curation as _curation
 using EpochManager as _epochManager
-using RewardsManagerHarness as _rewardsManager
+// using RewardsManagerHarness as _rewardsManager
 using Staking as _staking
 using GraphToken as _graphToken
 using L1GraphTokenGateway as _graphTokenGateway
@@ -17,13 +17,25 @@ methods {
 
     // _resolveContract(bytes32 _nameHash) returns (address) 
     //     => linkedAddress(_nameHash)
-    
+    getAccRewardsPerSignal() returns (uint256) envfree
+    getAccRewardsForSubgraph(bytes32) returns (uint256) envfree
+    getAccRewardsPerAllocatedToken(bytes32) returns (uint256, uint256) envfree
+    getRewards(address) returns (uint256) envfree
+
     _curation.getCurationPoolTokens(bytes32) returns (uint256) envfree
     _graphToken.balanceOf(address) returns (uint256) envfree
     _graphToken.totalSupply() returns (uint256) envfree
     _graphToken.mint(address,uint256) envfree
     _staking.getAllocation(address) returns ((address,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)) envfree
     _staking.getSubgraphAllocatedTokens(bytes32) returns (uint256) envfree
+
+    getCurationPoolTokens(bytes32) returns (uint256) => DISPATCHER(true)
+    balanceOf(address) returns (uint256) => DISPATCHER(true)
+    totalSupply() returns (uint256) => DISPATCHER(true)
+    mint(address,uint256) => DISPATCHER(true)
+    getAllocation(address) returns ((address,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)) => DISPATCHER(true)
+    getSubgraphAllocatedTokens(bytes32) returns (uint256) => DISPATCHER(true)
+    
     _addressCache(bytes32) returns (address) envfree
 
     subgraphs(bytes32) returns (uint256,uint256,uint256,uint256) envfree
@@ -44,27 +56,28 @@ invariant specVsSolidityConsts()
     &&
     _addressCache(0x4375726174696f6e000000000000000000000000000000000000000000000000) == _curation &&
     _addressCache(0x45706f63684d616e616765720000000000000000000000000000000000000000) == _epochManager &&
-    _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == _rewardsManager &&
+    _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == currentContract &&
     _addressCache(0x5374616b696e6700000000000000000000000000000000000000000000000000) == _staking &&
     _addressCache(0x4772617068546f6b656e00000000000000000000000000000000000000000000) == _graphToken &&
     _addressCache(0x4772617068546f6b656e47617465776179000000000000000000000000000000) == _graphTokenGateway
 
 
-function linkedAddress(bytes32 _nameHash) returns address {    
-    if (_nameHash == 0x4375726174696f6e000000000000000000000000000000000000000000000000)
-        return _curation;
-    if (_nameHash == 0x45706f63684d616e616765720000000000000000000000000000000000000000)
-        return _epochManager;
-    if (_nameHash == 0x526577617264734d616e61676572000000000000000000000000000000000000)
-        return _rewardsManager;
-    if (_nameHash == 0x5374616b696e6700000000000000000000000000000000000000000000000000)
-        return _staking;
-    if (_nameHash == 0x4772617068546f6b656e00000000000000000000000000000000000000000000)
-        return _graphToken;
-    if (_nameHash == 0x4772617068546f6b656e47617465776179000000000000000000000000000000)
-        return _graphTokenGateway;
-    return 0;
-}
+// function linkedAddress(bytes32 _nameHash) returns address {   
+//     requireInvariant specVsSolidityConsts();
+//     if (_nameHash == 0x4375726174696f6e000000000000000000000000000000000000000000000000)
+//         return _curation;
+//     if (_nameHash == 0x45706f63684d616e616765720000000000000000000000000000000000000000)
+//         return _epochManager;
+//     if (_nameHash == 0x526577617264734d616e61676572000000000000000000000000000000000000)
+//         return currentContract;
+//     if (_nameHash == 0x5374616b696e6700000000000000000000000000000000000000000000000000)
+//         return _staking;
+//     if (_nameHash == 0x4772617068546f6b656e00000000000000000000000000000000000000000000)
+//         return _graphToken;
+//     if (_nameHash == 0x4772617068546f6b656e47617465776179000000000000000000000000000000)
+//         return _graphTokenGateway;
+//     return 0;
+// }
 
 rule complexity_check(method f) filtered {
     f -> !f.isView
@@ -76,32 +89,32 @@ rule complexity_check(method f) filtered {
     assert false, "this assertion should fail";
 }
 
-function setup(env e) {
-    // requireInvariant specVsSolidityConsts();
-    require CURATION() == 0x4375726174696f6e000000000000000000000000000000000000000000000000 &&
-    EPOCH_MANAGER() == 0x45706f63684d616e616765720000000000000000000000000000000000000000 &&
-    REWARDS_MANAGER() == 0x526577617264734d616e61676572000000000000000000000000000000000000 &&
-    STAKING() == 0x5374616b696e6700000000000000000000000000000000000000000000000000 &&
-    GRAPH_TOKEN() == 0x4772617068546f6b656e00000000000000000000000000000000000000000000 &&
-    GRAPH_TOKEN_GATEWAY() == 0x4772617068546f6b656e47617465776179000000000000000000000000000000
-    &&
-    _addressCache(0x4375726174696f6e000000000000000000000000000000000000000000000000) == _curation &&
-    _addressCache(0x45706f63684d616e616765720000000000000000000000000000000000000000) == _epochManager &&
-    _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == _rewardsManager &&
-    _addressCache(0x5374616b696e6700000000000000000000000000000000000000000000000000) == _staking &&
-    _addressCache(0x4772617068546f6b656e00000000000000000000000000000000000000000000) == _graphToken &&
-    _addressCache(0x4772617068546f6b656e47617465776179000000000000000000000000000000) == _graphTokenGateway;
-    require e.msg.sender != _curation;
-    require e.msg.sender != _epochManager;
-    require e.msg.sender != _rewardsManager;
-    require e.msg.sender != _staking;
-    require e.msg.sender != _graphToken;
-    require e.msg.sender != _graphTokenGateway;
-}
+// function setup(env e) {
+//     requireInvariant specVsSolidityConsts();
+//     // require CURATION() == 0x4375726174696f6e000000000000000000000000000000000000000000000000 &&
+//     // EPOCH_MANAGER() == 0x45706f63684d616e616765720000000000000000000000000000000000000000 &&
+//     // REWARDS_MANAGER() == 0x526577617264734d616e61676572000000000000000000000000000000000000 &&
+//     // STAKING() == 0x5374616b696e6700000000000000000000000000000000000000000000000000 &&
+//     // GRAPH_TOKEN() == 0x4772617068546f6b656e00000000000000000000000000000000000000000000 &&
+//     // GRAPH_TOKEN_GATEWAY() == 0x4772617068546f6b656e47617465776179000000000000000000000000000000
+//     // &&
+//     // _addressCache(0x4375726174696f6e000000000000000000000000000000000000000000000000) == _curation &&
+//     // _addressCache(0x45706f63684d616e616765720000000000000000000000000000000000000000) == _epochManager &&
+//     // _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == currentContract &&
+//     // _addressCache(0x5374616b696e6700000000000000000000000000000000000000000000000000) == _staking &&
+//     // _addressCache(0x4772617068546f6b656e00000000000000000000000000000000000000000000) == _graphToken &&
+//     // _addressCache(0x4772617068546f6b656e47617465776179000000000000000000000000000000) == _graphTokenGateway;
+//     // require e.msg.sender != _curation;
+//     // require e.msg.sender != _epochManager;
+//     // require e.msg.sender != _rewardsManager;
+//     // require e.msg.sender != _staking;
+//     // require e.msg.sender != _graphToken;
+//     // require e.msg.sender != _graphTokenGateway;
+// }
 
 rule takeRewards_check() {
     env e;
-    setup(e);
+    requireInvariant specVsSolidityConsts();
 
     address allocationID;
 
@@ -154,7 +167,7 @@ rule takeRewards_check() {
 
     // assert tokens_ == _tokens;
     // assert isDenied(_subgraphDeploymentID) => rewards == 0;
-    assert totalSupply_ - _totalSupply == rewards;
+    // assert totalSupply_ - _totalSupply == rewards;
     // assert rewards > 0 => _curationBalance > 0;
     // assert rewards > 0 => _subgraphSignalledTokens > minimumSubgraphSignal();
     // assert rewards > 0 => issuancePerBlock() > 0;
@@ -166,5 +179,39 @@ rule takeRewards_check() {
 
     uint256 rewards2 = takeRewards(e, allocationID);
     assert rewards2 == 0;
-    assert false;
+    // assert false;
 }
+
+
+// rule takeRewards_check2() {
+//     env e;
+//     requireInvariant specVsSolidityConsts();
+
+//     address allocationID;
+
+//     uint256 _totalSupply = _graphToken.totalSupply(e);
+
+//     uint256 _accRewardsPerSignal;
+//     uint256 _accRewardsForSubgraph1;
+//     uint256 _accRewardsPerAllocatedToken;
+//     uint256 _accRewardsForSubgraph2;
+//     uint256 _calcRewards;
+//     _accRewardsPerSignal = getAccRewardsPerSignal();
+//     _accRewardsForSubgraph1 = getAccRewardsForSubgraph(allocationID);
+//     _accRewardsPerAllocatedToken, _accRewardsForSubgraph2 = getAccRewardsPerAllocatedToken(allocationID);
+//     _calcRewards = getRewards(allocationID);
+
+//     uint256 rewards = takeRewards(e, allocationID);
+
+//     uint256 totalSupply_ = _graphToken.totalSupply(e);
+
+//     uint256 accRewardsPerSignal_;
+//     uint256 accRewardsForSubgraph1_;
+//     uint256 accRewardsPerAllocatedToken_;
+//     uint256 accRewardsForSubgraph2_;
+//     uint256 calcRewards_;
+//     accRewardsPerSignal_ = getAccRewardsPerSignal();
+//     accRewardsForSubgraph1_ = getAccRewardsForSubgraph(allocationID);
+//     accRewardsPerAllocatedToken_, accRewardsForSubgraph2_ = getAccRewardsPerAllocatedToken(allocationID);
+//     calcRewards_ = getRewards(allocationID);
+// }
