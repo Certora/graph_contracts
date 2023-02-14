@@ -21,14 +21,10 @@ certoraRun \
     certora/munged/token/GraphToken.sol \
     certora/munged/curation/Curation.sol \
     certora/munged/governance/Controller.sol \
-    certora/munged/rewards/RewardsManager.sol \
     certora/munged/epochs/EpochManager.sol \
-    --link RewardsManagerHarness:controller=Controller \
-    --link RewardsManagerHarness:_graphToken=GraphToken \
-    --link RewardsManagerHarness:_curation=Curation \
-    --link RewardsManagerHarness:_rewardsManager=RewardsManager \
-    --link RewardsManagerHarness:_epochManager=EpochManager \
-    --verify RewardsManagerHarness:certora/specs/complexity.spec \
+    certora/munged/staking/Staking.sol \
+    certora/munged/gateway/L1GraphTokenGateway.sol \
+    --verify RewardsManagerHarness:certora/specs/RewardsManager.spec \
     --packages @openzeppelin=node_modules/@openzeppelin \
     --staging \
     --optimistic_loop \
@@ -38,3 +34,8 @@ certoraRun \
     --send_only \
     --msg "RewardsManagerHarness: $1 $2"
 
+    # --link RewardsManagerHarness:controller=Controller \
+    # --link RewardsManagerHarness:_graphToken=GraphToken \
+    # --link RewardsManagerHarness:_curation=Curation \
+    # --link RewardsManagerHarness:_rewardsManager=RewardsManagerHarness \
+    # --link RewardsManagerHarness:_epochManager=EpochManager \
