@@ -28,3 +28,21 @@ tx-*.log
 
 # Keys
 .keystore
+# docs artifacts
+docs/modules/api
+# only used to package @openzeppelin/contracts
+contracts/build/
+contracts/README.md
+# temporary artifact from solidity-coverage
+allFiredEvents
+.coverage_artifacts
+.coverage_cache
+.coverage_contracts
+# hardhat
+cache
+artifacts
+# Certora
+certora/munged
+.certora*
+.last_confs
+certora_*
