@@ -1,6 +1,6 @@
 import "Setup.spec"
 
-rule complexity_check(method f) filtered {
+rule complexity(method f) filtered {
     f -> !f.isView
 } {
     env e; calldataarg args;
@@ -10,7 +10,7 @@ rule complexity_check(method f) filtered {
     assert false, "this assertion should fail";
 }
 
-rule closeAllocation_check() {
+rule closeAllocation() {
     specVsSolidityConsts();
     env e;
     address _allocationID;
@@ -22,6 +22,8 @@ rule closeAllocation_check() {
 
     assert !success;
 }
+
+// https://vaas-stg.certora.com/output/95893/961519952853404db67a71ac1989cb56/?anonymousKey=dbcab2adddfaed031d21ae269045e06d945dd078
 
 // rule slash_check(){
 //     address _indexer;

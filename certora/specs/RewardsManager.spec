@@ -84,6 +84,8 @@ rule takeRewardsMonoIncreasingWithIssurancePerBlock() {
 }
 
 
+// https://vaas-stg.certora.com/output/95893/f4133bd8060c4f999bc3dfdaf58243df/?anonymousKey=303ffe12073a9749cee7b15eeab4e32d84095564
+
 // rule takeRewards_check() {
 //     env e;
 //     specVsSolidityConsts();
