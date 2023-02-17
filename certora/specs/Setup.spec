@@ -44,6 +44,10 @@ methods {
     isDenied(bytes32) returns (bool) => DISPATCHER(true)
     issuancePerBlock() returns (uint256) => DISPATCHER(true)
     minimumSubgraphSignal() returns (uint256) => DISPATCHER(true)
+    getAccRewardsPerSignal() returns (uint256) => DISPATCHER(true)
+    getAccRewardsForSubgraph(bytes32) returns (uint256) => DISPATCHER(true)
+    getAccRewardsPerAllocatedToken(bytes32) returns (uint256, uint256) => DISPATCHER(true)
+    getRewards(address) returns (uint256) => DISPATCHER(true)
 }
 
 function specVsSolidityConsts() {

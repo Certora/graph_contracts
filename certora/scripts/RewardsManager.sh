@@ -34,6 +34,9 @@ certoraRun \
     $RULE \
     --send_only \
     --rule_sanity=basic \
+    --settings -depth=60 \
+    --settings -mediumTimeout=300 \
+    --settings -t=1200 \
     --msg "RewardsManagerHarness: $1 $2"
 
     

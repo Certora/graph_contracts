@@ -1,59 +1,6 @@
 import "Setup.spec"
-using Controller as controller
-using Curation as _curation
-using EpochManager as _epochManager
-using RewardsManagerHarness as _rewardsManager
-using Staking as _staking
-using GraphToken as _graphToken
-using L1GraphTokenGateway as _graphTokenGateway
 
-methods {
-    CURATION() returns (bytes32) envfree
-    EPOCH_MANAGER() returns (bytes32) envfree
-    REWARDS_MANAGER() returns (bytes32) envfree
-    STAKING() returns (bytes32) envfree
-    GRAPH_TOKEN() returns (bytes32) envfree
-    GRAPH_TOKEN_GATEWAY() returns (bytes32) envfree
-
-    getAccRewardsPerSignal() returns (uint256) envfree
-    getAccRewardsForSubgraph(bytes32) returns (uint256) envfree
-    getAccRewardsPerAllocatedToken(bytes32) returns (uint256, uint256) envfree
-    getRewards(address) returns (uint256) envfree
-
-    _curation.getCurationPoolTokens(bytes32) returns (uint256) envfree
-    _graphToken.balanceOf(address) returns (uint256) envfree
-    _graphToken.totalSupply() returns (uint256) envfree
-    _graphToken.mint(address,uint256) envfree
-    _staking.getAllocation(address) returns ((address,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)) envfree
-    _staking.getSubgraphAllocatedTokens(bytes32) returns (uint256) envfree
-
-    getCurationPoolTokens(bytes32) returns (uint256) => DISPATCHER(true)
-    balanceOf(address) returns (uint256) => DISPATCHER(true)
-    totalSupply() returns (uint256) => DISPATCHER(true)
-    mint(address,uint256) => DISPATCHER(true)
-    getAllocation(address) returns ((address,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)) => DISPATCHER(true)
-    getSubgraphAllocatedTokens(bytes32) returns (uint256) => DISPATCHER(true)
-
-   
-}
-
-invariant specVsSolidityConsts()
-    CURATION() == 0x4375726174696f6e000000000000000000000000000000000000000000000000 &&
-    EPOCH_MANAGER() == 0x45706f63684d616e616765720000000000000000000000000000000000000000 &&
-    REWARDS_MANAGER() == 0x526577617264734d616e61676572000000000000000000000000000000000000 &&
-    STAKING() == 0x5374616b696e6700000000000000000000000000000000000000000000000000 &&
-    GRAPH_TOKEN() == 0x4772617068546f6b656e00000000000000000000000000000000000000000000 &&
-    GRAPH_TOKEN_GATEWAY() == 0x4772617068546f6b656e47617465776179000000000000000000000000000000
-    &&
-    _addressCache(0x4375726174696f6e000000000000000000000000000000000000000000000000) == _curation &&
-    _addressCache(0x45706f63684d616e616765720000000000000000000000000000000000000000) == _epochManager &&
-    _addressCache(0x526577617264734d616e61676572000000000000000000000000000000000000) == _rewardsManager &&
-    _addressCache(0x5374616b696e6700000000000000000000000000000000000000000000000000) == _staking &&
-    _addressCache(0x4772617068546f6b656e00000000000000000000000000000000000000000000) == _graphToken &&
-    _addressCache(0x4772617068546f6b656e47617465776179000000000000000000000000000000) == _graphTokenGateway
-
-
-rule complexity_check(method f) filtered {
+rule complexity(method f) filtered {
     f -> !f.isView
 } {
     env e; calldataarg args;
@@ -63,97 +10,178 @@ rule complexity_check(method f) filtered {
     assert false, "this assertion should fail";
 }
 
-rule takeRewards_check() {
+rule takeRewardsTwice() {
+    specVsSolidityConsts();
+    
     env e;
-    requireInvariant specVsSolidityConsts();
-
     address allocationID;
 
-    uint256 _totalSupply = _graphToken.totalSupply();
-    // uint256 _curationBalance = _graphToken.balanceOf(_curation);
+    uint256 rewards = takeRewards(e, allocationID);
+    uint256 rewards2 = takeRewards(e, allocationID);
+    assert rewards2 == 0;
+}
 
-    // address _indexer;
-    // bytes32 _subgraphDeploymentID;
-    // uint256 _tokens; // Tokens allocated to a SubgraphDeployment
-    // uint256 _createdAtEpoch; // Epoch when it was created
-    // uint256 _closedAtEpoch; // Epoch when it was closed
-    // uint256 _collectedFees; // Collected fees for the allocation
-    // uint256 _effectiveAllocation; // Effective allocation when closed
-    // uint256 _accRewardsPerAllocatedTokenAlloc; 
+rule takeRewardsCalc() {
+    specVsSolidityConsts();
 
-    // _indexer, _subgraphDeploymentID, _tokens, _createdAtEpoch, _closedAtEpoch, _collectedFees, _effectiveAllocation, _accRewardsPerAllocatedTokenAlloc = _staking.getAllocation(allocationID);
+    env e;
+    address allocationID;
+    uint256 tokens; 
 
-    // uint256 _accRewardsForSubgraph;
-    // uint256 _accRewardsForSubgraphSnapshot;
-    // uint256 _accRewardsPerSignalSnapshot;
-    // uint256 _accRewardsPerAllocatedTokenSubgraph;
-
-    // _accRewardsForSubgraph, _accRewardsForSubgraphSnapshot, _accRewardsPerSignalSnapshot, _accRewardsPerAllocatedTokenSubgraph = subgraphs(_subgraphDeploymentID);
-
-    // uint256 _subgraphSignalledTokens = _curation.getCurationPoolTokens(_subgraphDeploymentID);
+    bytes32 subgraphDeploymentID;
+    uint256 _accRewardsPerAllocatedToken;
+    _, subgraphDeploymentID, tokens, _, _, _, _, _accRewardsPerAllocatedToken = _staking.getAllocation(e, allocationID);
+    uint256 _totalSupply = _graphToken.totalSupply(e);
 
     uint256 rewards = takeRewards(e, allocationID);
 
-    uint256 totalSupply_ = _graphToken.totalSupply();
+    uint256 accRewardsPerAllocatedToken_;
+    _, _, _, accRewardsPerAllocatedToken_ = subgraphs(e, subgraphDeploymentID);
+    uint256 totalSupply_ = _graphToken.totalSupply(e);
 
-    // address indexer_;
-    // bytes32 subgraphDeploymentID_;
-    // uint256 tokens_; // Tokens allocated to a SubgraphDeployment
-    // uint256 createdAtEpoch_; // Epoch when it was created
-    // uint256 closedAtEpoch_; // Epoch when it was closed
-    // uint256 collectedFees_; // Collected fees for the allocation
-    // uint256 effectiveAllocation_; // Effective allocation when closed
-    // uint256 accRewardsPerAllocatedTokenAlloc_; 
+    if (isDenied(e, subgraphDeploymentID) == true) {
+        assert rewards == 0;
+    } else {
+        assert rewards == tokens * (accRewardsPerAllocatedToken_ - _accRewardsPerAllocatedToken) / FIXED_POINT_SCALING_FACTOR(e);
+    }
+    assert totalSupply_ - _totalSupply == rewards;
+}
 
-    // indexer_, subgraphDeploymentID_, tokens_, createdAtEpoch_, closedAtEpoch_, collectedFees_, effectiveAllocation_, accRewardsPerAllocatedTokenAlloc_ = _staking.getAllocation(allocationID);
+rule takeRewardsMonoIncreasingWithTime() {
+    specVsSolidityConsts();
 
-    // assert subgraphDeploymentID_ == _subgraphDeploymentID;
+    env e1; env e2;
+    require e1.block.number < e2.block.number;
+    address allocationID;
 
-    // uint256 accRewardsForSubgraph_;
-    // uint256 accRewardsForSubgraphSnapshot_;
-    // uint256 accRewardsPerSignalSnapshot_;
-    // uint256 accRewardsPerAllocatedTokenSubgraph_;
+    storage initial = lastStorage;
 
-    // accRewardsForSubgraph_, accRewardsForSubgraphSnapshot_, accRewardsPerSignalSnapshot_, accRewardsPerAllocatedTokenSubgraph_ = subgraphs(_subgraphDeploymentID);
+    uint256 rewards1 = takeRewards(e1, allocationID);
+    uint256 rewards2 = takeRewards(e2, allocationID) at initial;
 
-    // assert tokens_ == _tokens;
-    // assert isDenied(_subgraphDeploymentID) => rewards == 0;
-    // assert totalSupply_ - _totalSupply == rewards;
-    // assert rewards > 0 => _curationBalance > 0;
-    // assert rewards > 0 => _subgraphSignalledTokens > minimumSubgraphSignal();
-    // assert rewards > 0 => issuancePerBlock() > 0;
-    // assert rewards > 0 => e.block.timestamp > accRewardsPerSignalLastBlockUpdated();
-    // assert rewards > 0 => tokens_ > 0;
-    // assert rewards > 0 => accRewardsPerAllocatedTokenSubgraph_ > accRewardsPerAllocatedTokenAlloc_;
-    // assert rewards > 0 => accRewardsPerAllocatedTokenSubgraph_ > _accRewardsPerAllocatedTokenSubgraph;
-    // assert rewards > 0 => accRewardsPerSignalSnapshot_ > _accRewardsPerSignalSnapshot;
+    assert rewards1 <= rewards2;
+}
 
+rule takeRewardsMonoIncreasingWithIssurancePerBlock() {
+    specVsSolidityConsts();
+    storage initial = lastStorage;
+
+    env e;
+    address allocationID;
+
+    uint256 issuancePerBlock1;
+    uint256 issuancePerBlock2;
+    require issuancePerBlock1 < issuancePerBlock2;
+
+    setNewIssuancePerBlock(e, issuancePerBlock1) at initial;
+    uint256 rewards1 = takeRewards(e, allocationID);
+
+    setNewIssuancePerBlock(e, issuancePerBlock2) at initial;
     uint256 rewards2 = takeRewards(e, allocationID);
-    assert rewards2 == 0;
-    // assert false;
+
+    assert rewards1 <= rewards2;
+    // assert rewards1>=0;
 }
 
 
-// rule takeRewards_check2() {
+// rule takeRewards_check() {
 //     env e;
-//     requireInvariant specVsSolidityConsts();
+//     specVsSolidityConsts();
 
 //     address allocationID;
 
 //     uint256 _totalSupply = _graphToken.totalSupply(e);
+//     uint256 _curationBalance = _graphToken.balanceOf(e, _curation);
 
+//     address _indexer;
+//     bytes32 _subgraphDeploymentID;
+//     uint256 _tokens; // Tokens allocated to a SubgraphDeployment
+//     uint256 _createdAtEpoch; // Epoch when it was created
+//     uint256 _closedAtEpoch; // Epoch when it was closed
+//     uint256 _collectedFees; // Collected fees for the allocation
+//     uint256 _effectiveAllocation; // Effective allocation when closed
+//     uint256 _accRewardsPerAllocatedTokenAlloc; 
+
+//     _indexer, _subgraphDeploymentID, _tokens, _createdAtEpoch, _closedAtEpoch, _collectedFees, _effectiveAllocation, _accRewardsPerAllocatedTokenAlloc = _staking.getAllocation(e, allocationID);
+
+//     uint256 _accRewardsForSubgraph;
+//     uint256 _accRewardsForSubgraphSnapshot;
+//     uint256 _accRewardsPerSignalSnapshot;
+//     uint256 _accRewardsPerAllocatedTokenSubgraph;
+
+//     _accRewardsForSubgraph, _accRewardsForSubgraphSnapshot, _accRewardsPerSignalSnapshot, _accRewardsPerAllocatedTokenSubgraph = subgraphs(e, _subgraphDeploymentID);
+
+//     uint256 _subgraphSignalledTokens = _curation.getCurationPoolTokens(e, _subgraphDeploymentID);
+
+//     uint256 rewards = takeRewards(e, allocationID);
+
+//     uint256 totalSupply_ = _graphToken.totalSupply(e);
+
+//     address indexer_;
+//     bytes32 subgraphDeploymentID_;
+//     uint256 tokens_; // Tokens allocated to a SubgraphDeployment
+//     uint256 createdAtEpoch_; // Epoch when it was created
+//     uint256 closedAtEpoch_; // Epoch when it was closed
+//     uint256 collectedFees_; // Collected fees for the allocation
+//     uint256 effectiveAllocation_; // Effective allocation when closed
+//     uint256 accRewardsPerAllocatedTokenAlloc_; 
+
+//     indexer_, subgraphDeploymentID_, tokens_, createdAtEpoch_, closedAtEpoch_, collectedFees_, effectiveAllocation_, accRewardsPerAllocatedTokenAlloc_ = _staking.getAllocation(e, allocationID);
+
+//     assert subgraphDeploymentID_ == _subgraphDeploymentID;
+
+//     uint256 accRewardsForSubgraph_;
+//     uint256 accRewardsForSubgraphSnapshot_;
+//     uint256 accRewardsPerSignalSnapshot_;
+//     uint256 accRewardsPerAllocatedTokenSubgraph_;
+
+//     accRewardsForSubgraph_, accRewardsForSubgraphSnapshot_, accRewardsPerSignalSnapshot_, accRewardsPerAllocatedTokenSubgraph_ = subgraphs(e, _subgraphDeploymentID);
+
+//     assert tokens_ == _tokens;
+//     assert isDenied(e, _subgraphDeploymentID) => rewards == 0;
+//     assert totalSupply_ - _totalSupply == rewards;
+//     // assert rewards > 0 => _curationBalance > 0;
+//     assert rewards > 0 => _subgraphSignalledTokens > minimumSubgraphSignal(e);
+//     assert rewards > 0 => issuancePerBlock(e) > 0;
+//     assert rewards > 0 => e.block.timestamp > accRewardsPerSignalLastBlockUpdated(e);
+//     assert rewards > 0 => tokens_ > 0;
+//     assert rewards > 0 => accRewardsPerAllocatedTokenSubgraph_ > accRewardsPerAllocatedTokenAlloc_;
+//     assert rewards > 0 => accRewardsPerAllocatedTokenSubgraph_ > _accRewardsPerAllocatedTokenSubgraph;
+//     assert rewards > 0 => accRewardsPerSignalSnapshot_ > _accRewardsPerSignalSnapshot;
+
+//     // uint256 rewards2 = takeRewards(e, allocationID);
+//     // assert rewards2 == 0;
+//     // assert false;
+// }
+
+// rule takeRewards_check2() {
+//     env e;
+//     specVsSolidityConsts();
+//     address allocationID;
+
+//     address _indexer;
+//     bytes32 _subgraphDeploymentID;
+//     uint256 _tokens; // Tokens allocated to a SubgraphDeployment
+//     uint256 _createdAtEpoch; // Epoch when it was created
+//     uint256 _closedAtEpoch; // Epoch when it was closed
+//     uint256 _collectedFees; // Collected fees for the allocation
+//     uint256 _effectiveAllocation; // Effective allocation when closed
+//     uint256 _accRewardsPerAllocatedTokenAlloc; 
+
+//     _indexer, _subgraphDeploymentID, _tokens, _createdAtEpoch, _closedAtEpoch, _collectedFees, _effectiveAllocation, _accRewardsPerAllocatedTokenAlloc = _staking.getAllocation(e, allocationID);
+
+//     uint256 _totalSupply = _graphToken.totalSupply(e);
 //     uint256 _accRewardsPerSignal;
 //     uint256 _accRewardsForSubgraph1;
 //     uint256 _accRewardsPerAllocatedToken;
 //     uint256 _accRewardsForSubgraph2;
 //     uint256 _calcRewards;
-//     _accRewardsPerSignal = getAccRewardsPerSignal();
-//     _accRewardsForSubgraph1 = getAccRewardsForSubgraph(allocationID);
-//     _accRewardsPerAllocatedToken, _accRewardsForSubgraph2 = getAccRewardsPerAllocatedToken(allocationID);
-//     _calcRewards = getRewards(allocationID);
+//     _accRewardsPerSignal = getAccRewardsPerSignal(e);
+//     _accRewardsForSubgraph1 = getAccRewardsForSubgraph(e, _subgraphDeploymentID);
+//     _accRewardsPerAllocatedToken, _accRewardsForSubgraph2 = getAccRewardsPerAllocatedToken(e, _subgraphDeploymentID);
+//     _calcRewards = getRewards(e, allocationID);
 
 //     uint256 rewards = takeRewards(e, allocationID);
-
 //     uint256 totalSupply_ = _graphToken.totalSupply(e);
 
 //     uint256 accRewardsPerSignal_;
@@ -161,8 +189,14 @@ rule takeRewards_check() {
 //     uint256 accRewardsPerAllocatedToken_;
 //     uint256 accRewardsForSubgraph2_;
 //     uint256 calcRewards_;
-//     accRewardsPerSignal_ = getAccRewardsPerSignal();
-//     accRewardsForSubgraph1_ = getAccRewardsForSubgraph(allocationID);
-//     accRewardsPerAllocatedToken_, accRewardsForSubgraph2_ = getAccRewardsPerAllocatedToken(allocationID);
-//     calcRewards_ = getRewards(allocationID);
+//     accRewardsPerSignal_ = getAccRewardsPerSignal(e);
+//     accRewardsForSubgraph1_ = getAccRewardsForSubgraph(e, _subgraphDeploymentID);
+//     accRewardsPerAllocatedToken_, accRewardsForSubgraph2_ = getAccRewardsPerAllocatedToken(e, _subgraphDeploymentID);
+//     calcRewards_ = getRewards(e, allocationID);
+
+//     assert _accRewardsPerSignal >= accRewardsPerSignal_;
+//     assert _accRewardsForSubgraph1 >= accRewardsForSubgraph1_;
+//     assert _accRewardsPerAllocatedToken >= accRewardsPerAllocatedToken_;
+//     assert _accRewardsForSubgraph2 >= accRewardsForSubgraph2_;
+//     assert _calcRewards >= calcRewards_;
 // }
