@@ -1,0 +1,12 @@
+diff -ruN --exclude=node_modules --exclude=deployments --exclude=governance-scripts ../contracts/rewards/RewardsManager.sol rewards/RewardsManager.sol
+--- ../contracts/rewards/RewardsManager.sol	2023-02-09 12:40:00.000000000 -0500
++++ rewards/RewardsManager.sol	2023-02-17 20:24:01.000000000 -0500
+@@ -31,7 +31,7 @@
+ contract RewardsManager is RewardsManagerV4Storage, GraphUpgradeable, IRewardsManager {
+     using SafeMath for uint256;
+ 
+-    uint256 private constant FIXED_POINT_SCALING_FACTOR = 1e18;
++    uint256 public constant FIXED_POINT_SCALING_FACTOR = 1e18;
+ 
+     // -- Events --
+ 
