@@ -39,6 +39,7 @@ rule takeRewardsCalc() {
     _, _, _, accRewardsPerAllocatedToken_ = subgraphs(e, subgraphDeploymentID);
     uint256 totalSupply_ = _graphToken.totalSupply(e);
 
+    assert e.msg.sender == _staking;
     if (isDenied(e, subgraphDeploymentID) == true) {
         assert rewards == 0;
     } else {

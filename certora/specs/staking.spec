@@ -12,18 +12,42 @@ rule complexity(method f) filtered {
 
 rule closeAllocation() {
     specVsSolidityConsts();
-    env e;
+    env e1; env e2; 
     address _allocationID;
     bytes32 _poi;
+    require e1.block.timestamp <= e2.block.timestamp;
+    require e1.block.number <= e2.block.number;
 
-    closeAllocation(e, _allocationID, _poi);
-    closeAllocation@withrevert(e, _allocationID, _poi);
+    closeAllocation(e1, _allocationID, _poi);
+    closeAllocation@withrevert(e2, _allocationID, _poi);
     bool success = !lastReverted;
 
     assert !success;
 }
 
+
 // https://vaas-stg.certora.com/output/95893/961519952853404db67a71ac1989cb56/?anonymousKey=dbcab2adddfaed031d21ae269045e06d945dd078
+
+
+// rule closeAllocationTwice() {
+//     specVsSolidityConsts();
+//     env e1; env e2; env e3;
+//     method f; calldataarg args; 
+//     address _allocationID;
+//     bytes32 _poi;
+//     require e1.block.timestamp <= e2.block.timestamp;
+//     require e2.block.timestamp <= e3.block.timestamp;
+//     require e1.block.number <= e2.block.number;
+//     require e2.block.number <= e3.block.number;
+
+//     closeAllocation(e1, _allocationID, _poi);
+//     f(e2, args);
+//     closeAllocation@withrevert(e3, _allocationID, _poi);
+//     bool success = !lastReverted;
+
+//     assert !success;
+// }
+
 
 // rule slash_check(){
 //     address _indexer;

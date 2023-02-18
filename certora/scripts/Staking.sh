@@ -1,4 +1,4 @@
-!/bin/bash
+# !/bin/bash
 
 if [[ "$1" ]]
 then
@@ -21,5 +21,8 @@ certoraRun \
     --solc solc7.6 \
     $RULE \
     --send_only \
+    --settings -depth=60 \
+    --settings -mediumTimeout=300 \
+    --settings -t=1200 \
     --msg "StakingHarness: $1 $2"
 
