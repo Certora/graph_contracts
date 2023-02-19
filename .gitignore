@@ -30,3 +30,4 @@ tx-*.log
 .keystore
 
 certora/munged
+.certora*
