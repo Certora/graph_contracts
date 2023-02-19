@@ -25,7 +25,6 @@ certoraRun certora/harnesses/RewardsManagerHarness.sol \
     contracts/governance/Controller.sol \
     contracts/epochs/EpochManager.sol \
     contracts/gateway/L1GraphTokenGateway.sol \
-    --link RewardsManagerHarness:controller=Controller \
     --verify RewardsManagerHarness:certora/specs/RewardsManager.spec \
     --packages @openzeppelin=node_modules/@openzeppelin \
     --staging \
@@ -33,10 +32,10 @@ certoraRun certora/harnesses/RewardsManagerHarness.sol \
     --loop_iter 3 \
     --solc solc7.6 \
     $RULE \
-    --send_only \
     --rule_sanity=basic \
     --msg "RewardsManagerHarness: $1 $2"
-
+   # --link RewardsManagerHarness:controller=Controller \
+   #--send_only \
   #    certora/harnesses/StakingHarness.sol \  
     # --link RewardsManagerHarness:_graphToken=GraphToken \
     # --link RewardsManagerHarness:_curation=Curation \

@@ -7,7 +7,7 @@ using Staking as _staking
 using GraphToken as _graphToken
 using L1GraphTokenGateway as _graphTokenGateway
 
-methods {
+//methods {
  //   graphToken() returns (bytes32) envfree => ALWAYS(_graphToken)// define function that returns _graphToken
 
  /*   CURATION() returns (bytes32) envfree
@@ -37,7 +37,7 @@ methods {
     getSubgraphAllocatedTokens(bytes32) returns (uint256) => DISPATCHER(true)
 
   */ 
-}
+//}
 //function graphToken()
 
 rule sanity {
