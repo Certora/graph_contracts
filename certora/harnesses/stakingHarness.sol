@@ -1,7 +1,7 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import "certora/munged/staking/Staking.sol";
+import "contracts/staking/Staking.sol";
 
 contract StakingHarness is Staking {
  /*   function isSlasher() public returns (bool) {

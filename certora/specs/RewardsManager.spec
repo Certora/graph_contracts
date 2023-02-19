@@ -8,7 +8,7 @@ using GraphToken as _graphToken
 using L1GraphTokenGateway as _graphTokenGateway
 
 methods {
- //   graphToken() returns (bytes32) envfree => ALWAYS _graphToken // define function that returns _graphToken
+ //   graphToken() returns (bytes32) envfree => ALWAYS(_graphToken)// define function that returns _graphToken
 
  /*   CURATION() returns (bytes32) envfree
     EPOCH_MANAGER() returns (bytes32) envfree
@@ -38,7 +38,7 @@ methods {
 
   */ 
 }
-
+//function graphToken()
 
 rule sanity {
     env e;
