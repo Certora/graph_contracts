@@ -27,10 +27,10 @@ rule closeAllocation() {
 invariant closedAtEpochIntegrity(address _allocationID)
     getAllocationClosedAtEpoch(_allocationID) != 0 =>
         getAllocationClosedAtEpoch(_allocationID) >= getAllocationCreatedAtEpoch(_allocationID)
-
-    // filtered {
-    //     m -> m.selector != multicall(bytes[]).selector && m.selector != claimMany(address[],bool).selector
-    // }
+    filtered {
+        m -> m.selector != multicall(bytes[]).selector 
+        // && m.selector != claimMany(address[],bool).selector
+    }
 
 // https://vaas-stg.certora.com/output/95893/961519952853404db67a71ac1989cb56/?anonymousKey=dbcab2adddfaed031d21ae269045e06d945dd078
 
