@@ -7,13 +7,20 @@ using GraphToken            as _graphToken
 using L1GraphTokenGateway   as _graphTokenGateway
 
 methods {
+    CURATION()            returns (bytes32) => ghostCuration()
+    EPOCH_MANAGER()       returns (bytes32) => ghostEpochManager()
+    REWARDS_MANAGER()     returns (bytes32) => ghostRewardsManager() 
+    STAKING()             returns (bytes32) => ghostStaking() 
+    GRAPH_TOKEN()         returns (bytes32) => ghostGraphToken()
+    GRAPH_TOKEN_GATEWAY() returns (bytes32) => ghostGraphTokenGw()
+/*
     CURATION()            returns (bytes32) envfree
     EPOCH_MANAGER()       returns (bytes32) envfree
     REWARDS_MANAGER()     returns (bytes32) envfree
     STAKING()             returns (bytes32) envfree
     GRAPH_TOKEN()         returns (bytes32) envfree
     GRAPH_TOKEN_GATEWAY() returns (bytes32) envfree
-
+*/
     // Controller
     getContractProxy(bytes32) returns (address)                                                        => DISPATCHER(true)
 
@@ -51,6 +58,28 @@ methods {
     getRewards(address) returns (uint256)                                                              => DISPATCHER(true)
 }
 
+ghost ghostCuration() returns bytes32;
+ghost ghostEpochManager() returns bytes32;
+ghost ghostRewardsManager() returns bytes32;
+ghost ghostStaking() returns bytes32;
+ghost ghostGraphToken() returns bytes32;
+ghost ghostGraphTokenGw() returns bytes32;
+
+function specVsSolidityConsts() {
+    require
+    _addressCache(ghostCuration())           == _curation                                   &&
+    _addressCache(ghostEpochManager())       == _epochManager                               &&
+    _addressCache(ghostRewardsManager())     == _rewardsManager                             &&
+    _addressCache(ghostStaking())            == _staking                                    &&
+    _addressCache(ghostGraphToken())         == _graphToken                                 &&
+    _addressCache(ghostGraphTokenGw())       == _graphTokenGateway                          &&
+    ghostCuration()       > ghostEpochManager()                                             &&
+    ghostEpochManager()   > ghostRewardsManager()                                           &&
+    ghostRewardsManager() > ghostStaking()                                                  &&
+    ghostStaking()        > ghostGraphToken()                                               &&
+    ghostGraphToken()     > ghostGraphTokenGw();
+}
+/*
 function specVsSolidityConsts() {
     require
     CURATION()                           == 0x4375726174696f6e000000000000000000000000000000000000000000000000 &&
@@ -67,3 +96,4 @@ function specVsSolidityConsts() {
     _addressCache(GRAPH_TOKEN())         == _graphToken                                                        &&
     _addressCache(GRAPH_TOKEN_GATEWAY()) == _graphTokenGateway;
 }
+*/
