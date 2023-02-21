@@ -11,4 +11,11 @@ contract StakingHarness is Staking {
     function getIndexerStake(address _indexer) public returns (Stakes.Indexer memory) {
         return stakes[_indexer];
     }
+
+    function getAllocationCreatedAtEpoch(address _allocationID) public returns (uint256) {
+        return allocations[_allocationID].createdAtEpoch;
+    }
+    function getAllocationClosedAtEpoch(address _allocationID) public returns (uint256) {
+        return allocations[_allocationID].closedAtEpoch;
+    }
 }

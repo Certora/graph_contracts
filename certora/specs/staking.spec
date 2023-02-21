@@ -14,17 +14,23 @@ rule closeAllocation() {
     specVsSolidityConsts();
     env e1; env e2; 
     address _allocationID;
-    bytes32 _poi;
-    require e1.block.timestamp <= e2.block.timestamp;
-    require e1.block.number <= e2.block.number;
+    bytes32 _poi1;
+    bytes32 _poi2;
 
-    closeAllocation(e1, _allocationID, _poi);
-    closeAllocation@withrevert(e2, _allocationID, _poi);
+    closeAllocation(e1, _allocationID, _poi1);
+    closeAllocation@withrevert(e2, _allocationID, _poi2);
     bool success = !lastReverted;
 
     assert !success;
 }
 
+invariant closedAtEpochIntegrity(address _allocationID)
+    getAllocationClosedAtEpoch(_allocationID) != 0 =>
+        getAllocationClosedAtEpoch(_allocationID) >= getAllocationCreatedAtEpoch(_allocationID)
+
+    // filtered {
+    //     m -> m.selector != multicall(bytes[]).selector && m.selector != claimMany(address[],bool).selector
+    // }
 
 // https://vaas-stg.certora.com/output/95893/961519952853404db67a71ac1989cb56/?anonymousKey=dbcab2adddfaed031d21ae269045e06d945dd078
 
@@ -34,15 +40,12 @@ rule closeAllocation() {
 //     env e1; env e2; env e3;
 //     method f; calldataarg args; 
 //     address _allocationID;
-//     bytes32 _poi;
-//     require e1.block.timestamp <= e2.block.timestamp;
-//     require e2.block.timestamp <= e3.block.timestamp;
-//     require e1.block.number <= e2.block.number;
-//     require e2.block.number <= e3.block.number;
+//     bytes32 _poi1;
+//     bytes32 _poi3;
 
-//     closeAllocation(e1, _allocationID, _poi);
+//     closeAllocation(e1, _allocationID, _poi1);
 //     f(e2, args);
-//     closeAllocation@withrevert(e3, _allocationID, _poi);
+//     closeAllocation@withrevert(e3, _allocationID, _poi3);
 //     bool success = !lastReverted;
 
 //     assert !success;

@@ -39,11 +39,15 @@ methods {
     getSubgraphAllocatedTokens(bytes32) returns (uint256)                                              => DISPATCHER(true)
     isSlasher() returns (bool)                                                                         => DISPATCHER(true)
     getIndexerStake(address) returns ((uint256,uint256,uint256,uint256))                               => DISPATCHER(true)
-    closeAllocation(address,bytes32)                                                                   => DISPATCHER(true)
+    closeAllocation(address,bytes32)                                                                   => DISPATCHER(true)    
 
     // _rewardManager
     takeRewards(address) returns (uint256)                                                             => DISPATCHER(true)
     onSubgraphAllocationUpdate(bytes32) returns (uint256)                                              => DISPATCHER(true)
+    getAllocationCreatedAtEpoch(address) returns (uint256) envfree
+    getAllocationCreatedAtEpoch(address) returns (uint256)                                             => DISPATCHER(true)
+    getAllocationClosedAtEpoch(address) returns (uint256) envfree
+    getAllocationClosedAtEpoch(address) returns (uint256)                                              => DISPATCHER(true)
     getAllocation(address) returns ((address,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)) => DISPATCHER(true)
     _addressCache(bytes32) returns (address) envfree
     _addressCache(bytes32) returns (address)                                                           => DISPATCHER(true)
