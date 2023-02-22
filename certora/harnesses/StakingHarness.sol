@@ -18,4 +18,9 @@ contract StakingHarness is Staking {
     function getAllocationClosedAtEpoch(address _allocationID) public returns (uint256) {
         return allocations[_allocationID].closedAtEpoch;
     }
+
+    //function getAllocationState(address _allocationID) public returns (uint256) {
+    //    return allocations[_allocationID].state;
+   // }
+
 }

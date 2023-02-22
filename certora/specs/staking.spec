@@ -24,6 +24,56 @@ rule closeAllocation() {
     assert !success;
 }
 
+rule claimManyIntegrity() {
+    specVsSolidityConsts();
+    env e;
+    address _allocationID1; address _allocationID2;
+    address[] _allocationArr; 
+    bool restake;
+    bool claim1Revert; bool claim2Revert; bool claimManyRevert;
+
+    require _allocationArr.length == 2;
+    require _allocationArr[0] == _allocationID1;
+    require _allocationArr[1] == _allocationID2;
+   
+    storage initial = lastStorage;
+
+    claim@withrevert(e, _allocationID1, restake);
+    claim1Revert = lastReverted;
+    claim@withrevert(e, _allocationID2, restake);
+    claim2Revert = lastReverted;
+
+    claimMany@withrevert(e, _allocationArr, restake) at initial;
+    claimManyRevert = lastReverted;
+
+    assert (claim1Revert || claim2Revert) <=> claimManyRevert;
+}
+
+//temporary rule, because array of 2 timed out
+rule claimManyIntegrityTest() {
+    specVsSolidityConsts();
+    env e;
+    address _allocationID1; address _allocationID2;
+    address[] _allocationArr; 
+    bool restake;
+    bool claim1Revert; bool claim2Revert; bool claimManyRevert;
+
+    require _allocationArr.length == 1;
+    require _allocationArr[0] == _allocationID1;
+    //require _allocationArr[1] == _allocationID2;
+   
+    storage initial = lastStorage;
+
+    claim@withrevert(e, _allocationID1, restake);
+    claim1Revert = lastReverted;
+    //claim@withrevert(e, _allocationID2, restake);
+    //claim2Revert = lastReverted;
+
+    claimMany@withrevert(e, _allocationArr, restake) at initial;
+    claimManyRevert = lastReverted;
+
+    assert (claim1Revert) <=> claimManyRevert;
+}
 invariant closedAtEpochIntegrity(address _allocationID)
     getAllocationClosedAtEpoch(_allocationID) != 0 =>
         getAllocationClosedAtEpoch(_allocationID) >= getAllocationCreatedAtEpoch(_allocationID)
@@ -31,6 +81,43 @@ invariant closedAtEpochIntegrity(address _allocationID)
         m -> m.selector != claimMany(address[],bool).selector
         // && m.selector != multicall(bytes[]).selector 
     }
+/*
+invariant epochAndStateCorrelation(address _allocationID)
+    getAllocationClosedAtEpoch(_allocationID) != 0 => 
+           (getAllocationState(_allocationID) == AllocationState.Active)
+            //AllocationState.Active)
+       // require(allocState == AllocationState.Active, "!active");
+ */
+/*
+    /**
+     * @dev Possible states an allocation can be
+     * States:
+     * - Null = indexer == address(0)
+     * - Active = not Null && tokens > 0
+     * - Closed = Active && closedAtEpoch != 0
+     * - Finalized = Closed && closedAtEpoch + channelDisputeEpochs > now()
+     * - Claimed = not Null && tokens == 0
+     */
+  /*  enum AllocationState {
+        Null,
+        Active,
+        Closed,
+        Finalized,
+        Claimed
+    }
+
+_getAllocationState(_allocationID) != AllocationState.Null;
+*/
+
+//ideas for invariant:
+/*
+state active -> epochTime == 0
+if epochTimeCreated(allocationId) != 0 => active(allocationId)
+if epochTimeClosed(allocationId) !=0  => !active(allocationId) CLAIMED?
+invariant epochTimeClosedIntegrity (address allocationId)
+{
+}
+*/
 
 // https://vaas-stg.certora.com/output/95893/961519952853404db67a71ac1989cb56/?anonymousKey=dbcab2adddfaed031d21ae269045e06d945dd078
 
