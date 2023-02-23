@@ -18,7 +18,7 @@ then
 fi
 certoraRun \
     certora/harnesses/RewardsManagerHarness.sol \
-    --verify RewardsManagerHarness:certora/specs/RewardsManager_complexity.spec \
+    --verify RewardsManagerHarness:certora/specs/complexity.spec \
     --packages @openzeppelin=node_modules/@openzeppelin \
     --staging \
     --optimistic_loop \

@@ -18,7 +18,7 @@ then
 fi
 certoraRun \
     certora/harnesses/StakingHarness.sol \
-    --verify StakingHarness:certora/specs/Staking_complexity.spec \
+    --verify StakingHarness:certora/specs/complexity.spec \
     --packages @openzeppelin=node_modules/@openzeppelin \
     --staging \
     --optimistic_loop \

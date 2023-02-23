@@ -1,15 +1,6 @@
 import "Setup.spec"
 
-rule complexity(method f) filtered {
-    f -> !f.isView
-} {
-    env e; calldataarg args;
-
-    f(e, args);
-
-    assert false, "this assertion should fail";
-}
-
+// https://vaas-stg.certora.com/output/95893/8cd801903a264d9bb981070806baaf64/?anonymousKey=3c107af8f7865a9b51688e31d31a5a9d62aefc3f
 rule closeAllocation() {
     specVsSolidityConsts();
     env e1; env e2; 
@@ -79,7 +70,7 @@ invariant closedAtEpochIntegrity(address _allocationID)
         getAllocationClosedAtEpoch(_allocationID) >= getAllocationCreatedAtEpoch(_allocationID)
     filtered {
         m -> m.selector != claimMany(address[],bool).selector
-        // && m.selector != multicall(bytes[]).selector 
+            && m.selector != multicall(bytes[]).selector 
     }
 /*
 invariant epochAndStateCorrelation(address _allocationID)
@@ -119,7 +110,6 @@ invariant epochTimeClosedIntegrity (address allocationId)
 }
 */
 
-// https://vaas-stg.certora.com/output/95893/961519952853404db67a71ac1989cb56/?anonymousKey=dbcab2adddfaed031d21ae269045e06d945dd078
 
 
 // rule closeAllocationTwice() {

@@ -1,13 +1,44 @@
 import "Setup.spec"
 
-rule complexity(method f) filtered {
-    f -> !f.isView
-} {
-    env e; calldataarg args;
+// https://vaas-stg.certora.com/output/95893/f4133bd8060c4f999bc3dfdaf58243df/?anonymousKey=303ffe12073a9749cee7b15eeab4e32d84095564
 
-    f(e, args);
+// this allocation  lifecycle is, imo, what we should ideally verify as much as possible, e.g.
+// the amount of minted rewards should be monotonically increasing as a function of the time between opening and closing
+rule takeRewardsMonoIncreasingWithTime() {
+    specVsSolidityConsts();
 
-    assert false, "this assertion should fail";
+    env e1; env e2;
+    require e1.block.number < e2.block.number;
+    address allocationID;
+
+    storage initial = lastStorage;
+
+    uint256 rewards1 = takeRewards(e1, allocationID);
+    uint256 rewards2 = takeRewards(e2, allocationID) at initial;
+
+    assert rewards1 <= rewards2;
+}
+
+// other allocations on the same subgraph trigger calls to onSubgraphAllocationUpdate, so they can change the resulting rate of accrual of rewards for the other allocation, but piece-wise the amount of rewards should follow the issuance rate
+rule takeRewardsMonoIncreasingWithIssurancePerBlock() {
+    specVsSolidityConsts();
+    storage initial = lastStorage;
+
+    env e;
+    address allocationID;
+
+    uint256 issuancePerBlock1;
+    uint256 issuancePerBlock2;
+    require issuancePerBlock1 < issuancePerBlock2;
+
+    setNewIssuancePerBlock(e, issuancePerBlock1);
+    uint256 rewards1 = takeRewards(e, allocationID);
+
+    setNewIssuancePerBlock(e, issuancePerBlock2) at initial;
+    uint256 rewards2 = takeRewards(e, allocationID);
+
+    assert rewards1 <= rewards2;
+    // assert rewards1>=0;
 }
 
 rule takeRewardsTwice() {
@@ -20,6 +51,10 @@ rule takeRewardsTwice() {
     uint256 rewards2 = takeRewards(e, allocationID);
     assert rewards2 == 0;
 }
+
+// For @Pablo the main thing that should hold is across several function calls rather than just in takeRewards:
+// when an allocation is created, its accRewardsPerAllocatedToken field is set through onSubgraphAllocationUpdate
+// when the allocation is closed, takeRewards gets a new value of the accumulated rewards per allocated token, and the minted amount of tokens should equal the difference between these two values multiplied by the amount of allocated tokens
 
 rule takeRewardsCalc() {
     specVsSolidityConsts();
@@ -48,44 +83,13 @@ rule takeRewardsCalc() {
     assert totalSupply_ - _totalSupply == rewards;
 }
 
-rule takeRewardsMonoIncreasingWithTime() {
-    specVsSolidityConsts();
+rule complexity_check {
+    method f; env e; calldataarg args;
 
-    env e1; env e2;
-    require e1.block.number < e2.block.number;
-    address allocationID;
+    f(e, args);
 
-    storage initial = lastStorage;
-
-    uint256 rewards1 = takeRewards(e1, allocationID);
-    uint256 rewards2 = takeRewards(e2, allocationID) at initial;
-
-    assert rewards1 <= rewards2;
+    assert false, "this assertion should fail";
 }
-
-rule takeRewardsMonoIncreasingWithIssurancePerBlock() {
-    specVsSolidityConsts();
-    storage initial = lastStorage;
-
-    env e;
-    address allocationID;
-
-    uint256 issuancePerBlock1;
-    uint256 issuancePerBlock2;
-    require issuancePerBlock1 < issuancePerBlock2;
-
-    setNewIssuancePerBlock(e, issuancePerBlock1) at initial;
-    uint256 rewards1 = takeRewards(e, allocationID);
-
-    setNewIssuancePerBlock(e, issuancePerBlock2) at initial;
-    uint256 rewards2 = takeRewards(e, allocationID);
-
-    assert rewards1 <= rewards2;
-    // assert rewards1>=0;
-}
-
-
-// https://vaas-stg.certora.com/output/95893/f4133bd8060c4f999bc3dfdaf58243df/?anonymousKey=303ffe12073a9749cee7b15eeab4e32d84095564
 
 // rule takeRewards_check() {
 //     env e;
