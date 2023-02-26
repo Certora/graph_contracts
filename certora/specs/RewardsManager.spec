@@ -1,9 +1,34 @@
 import "Setup.spec"
 
+/*
+rule example(method f) filtered {
+    f -> !f.view
+} {
+    // pre-condition
+    require ... // assuming true
+
+    // any functions or specific function
+    f(e, args) 
+
+    // post-condition
+    assert ... // asserting true
+}
+
+invariant example() 
+    condition // assuming before && asserting after any functions
+*/
+
+
 // https://vaas-stg.certora.com/output/95893/f4133bd8060c4f999bc3dfdaf58243df/?anonymousKey=303ffe12073a9749cee7b15eeab4e32d84095564
 
-// this allocation  lifecycle is, imo, what we should ideally verify as much as possible, e.g.
-// the amount of minted rewards should be monotonically increasing as a function of the time between opening and closing
+// Assuming everything being equal:
+// rewards should be monotonically increasing as a function of the time between opening and closing
+// rewards should be monotonically increasing as a function of issurance rate per block
+// rewards should be monotonically increasing as a function of _allocationID's AllocatedTokens
+// rewards should be monotonically decreasing as a function of subgraph's AllocatedTokens
+// rewards should be monotonically increasing as a function of subgraph's signalledTokens
+// rewards should be monotonically decreasing as a function of total signalledTokens
+
 rule takeRewardsMonoIncreasingWithTime() {
     specVsSolidityConsts();
 
@@ -78,7 +103,7 @@ rule takeRewardsCalc() {
     if (isDenied(e, subgraphDeploymentID) == true) {
         assert rewards == 0;
     } else {
-        assert rewards == tokens * (accRewardsPerAllocatedToken_ - _accRewardsPerAllocatedToken) / FIXED_POINT_SCALING_FACTOR(e);
+        assert to_mathint(rewards) == to_mathint(tokens) * (to_mathint(accRewardsPerAllocatedToken_) - to_mathint(_accRewardsPerAllocatedToken)) / to_mathint(FIXED_POINT_SCALING_FACTOR(e));
     }
     assert totalSupply_ - _totalSupply == rewards;
 }
