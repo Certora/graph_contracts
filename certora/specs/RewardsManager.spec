@@ -1,22 +1,20 @@
 import "Setup.spec"
 
-/*
-rule example(method f) filtered {
-    f -> !f.view
-} {
-    // pre-condition
-    require ... // assuming true
+// rule example(method f) filtered {
+//     f -> !f.view
+// } {
+//     // pre-condition
+//     require ...condition... // assuming true
 
-    // any functions or specific function
-    f(e, args) 
+//     // any functions or specific function
+//     f(e, args) 
 
-    // post-condition
-    assert ... // asserting true
-}
+//     // post-condition
+//     assert ...condition... // asserting true
+// }
 
-invariant example() 
-    condition // assuming before && asserting after any functions
-*/
+// invariant example() 
+//     ...condition... // assuming before && asserting after any functions
 
 
 // https://vaas-stg.certora.com/output/95893/f4133bd8060c4f999bc3dfdaf58243df/?anonymousKey=303ffe12073a9749cee7b15eeab4e32d84095564
@@ -98,7 +96,7 @@ rule takeRewardsCalc() {
     uint256 accRewardsPerAllocatedToken_;
     _, _, _, accRewardsPerAllocatedToken_ = subgraphs(e, subgraphDeploymentID);
     uint256 totalSupply_ = _graphToken.totalSupply(e);
-
+    
     assert e.msg.sender == _staking;
     if (isDenied(e, subgraphDeploymentID) == true) {
         assert rewards == 0;
